@@ -1,7 +1,7 @@
 module.exports = {
     entry: "./test/index.ts",
     output: {
-        filename: "./build/bmcommon-test.js",
+        filename: "./build/bluemath-common-test.js",
     },
 
     // Enable sourcemaps for debugging webpack's output.
