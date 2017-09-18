@@ -1,10 +1,7 @@
 
-```
-npm install @bluemath/common
-```
+## @bluemath/common
 
-This sub-package of BlueMath library implements some common facilities that
-are used throughout the library.
+Common components of BlueMath. NDArray, etc.
 
-* NDArray
-* Helper methods
+[![NPM package](https://img.shields.io/npm/v/@bluemath/common.svg)](https://www.npmjs.com/package/@bluemath/common)
+
