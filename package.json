@@ -1,6 +1,6 @@
 {
   "name": "@bluemath/common",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "BlueMath Common library",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -19,9 +19,9 @@
   "author": "Jayesh Salvi",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/bluemathsoft/bluemath/issues"
+    "url": "https://github.com/bluemathsoft/bm-common/issues"
   },
-  "homepage": "https://github.com/bluemathsoft/bluemath#readme",
+  "homepage": "https://github.com/bluemathsoft/bm-common#readme",
   "devDependencies": {
     "@types/jquery": "^3.2.11",
     "@types/qunit": "^2.0.31",
