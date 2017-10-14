@@ -1,6 +1,6 @@
 {
   "name": "@bluemath/common",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "BlueMath Common library",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -12,7 +12,7 @@
     "watch-test": "webpack --watch --config webpack.test.config.js",
     "prepare": "(cd src; tsc -p .)",
     "build-docs": "rm -rf docs/* && typedoc --excludeExternals --excludeNotExported --excludePrivate --out ./docs --mode file --readme docindex.md",
-    "build-docs-prod": "rm -rf docs/* && typedoc --excludeNotExported --excludePrivate --out ./docs --mode file --gaID \"UA-99857402-1\" "
+    "build-docs-prod": "rm -rf docs/* && typedoc --excludeExternals --excludeNotExported --excludePrivate --out ./docs --mode file --readme docindex.md --gaID \"UA-99857402-1\" "
   },
   "keywords": [
     "Math",
