@@ -9,6 +9,7 @@
   },
   "scripts": {
     "build-test": "webpack --config webpack.test.config.js",
+    "deploy-test": "cp ./build/bluemath-common-test.js ../bluemathsoft.github.io/bm/common/test/",
     "watch-test": "webpack --watch --config webpack.test.config.js",
     "prepare": "(cd src; tsc -p .)",
     "build-docs": "rm -rf docs/* && typedoc --excludeExternals --excludeNotExported --excludePrivate --out ./docs --mode file --readme docindex.md",
