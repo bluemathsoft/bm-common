@@ -325,21 +325,21 @@ export default function testNDArray() {
       QUnit.module('Data index to index', () => {
         QUnit.test('3x3x3 addressToIndex', assert => {
           let A = new NDArray({shape:[3,3,3]});
-          assert.deepEqual(A._addressToIndex(10), [1,0,1]);
-          assert.deepEqual(A._addressToIndex(11), [1,0,2]);
-          assert.deepEqual(A._addressToIndex(13), [1,1,1]);
-          assert.deepEqual(A._addressToIndex(14), [1,1,2]);
+          assert.deepEqual(A.addressToIndex(10), [1,0,1]);
+          assert.deepEqual(A.addressToIndex(11), [1,0,2]);
+          assert.deepEqual(A.addressToIndex(13), [1,1,1]);
+          assert.deepEqual(A.addressToIndex(14), [1,1,2]);
         });
         QUnit.test('3x3x3 indexToAddress', assert => {
           let A = new NDArray({shape:[3,3,3]});
-          assert.equal(A._indexToAddress(1,0,1),10);
-          assert.equal(A._indexToAddress(1,0,2),11);
-          assert.equal(A._indexToAddress(1,1,1),13);
-          assert.equal(A._indexToAddress(1,1,2),14);
+          assert.equal(A.indexToAddress(1,0,1),10);
+          assert.equal(A.indexToAddress(1,0,2),11);
+          assert.equal(A.indexToAddress(1,1,1),13);
+          assert.equal(A.indexToAddress(1,1,2),14);
         });
         QUnit.test('1x6', assert => {
           let A = new NDArray({shape:[1,6]});
-          assert.deepEqual(A._addressToIndex(3), [0,3]);
+          assert.deepEqual(A.addressToIndex(3), [0,3]);
         });
       });
 

@@ -116,10 +116,14 @@ function getDataArrayType(typestr?:string) {
  * 
  * It can store real as well as complex numbers in n-dimensions
  * It can be used to store Vectors (1D) or Matrices (2D).
- * This class stores the data internally in flat typed arrays
+ * This class stores the data internally in typed arrays
+ * 
+ * NDArray offers slicing to extract subarrays. The interface is inspired
+ * from numpy's API. It makes dealing with n-dimensional data extremely
+ * flexible.
  * 
  * NDArray is the central class of Bluemath library.
- * It's used to input and output data to/from most of the APIs of this library.
+ * It's used by most of the APIs of the bluemath library.
  * 
  * Construction
  * ---
@@ -132,13 +136,15 @@ function getDataArrayType(typestr?:string) {
  * new NDArray({shape:[3,4,3],datatype:'i32'});
  * ```
  * 
- * * Initializing it with array data
+ * * Initializing it with array data [[arr]]
  * ```javascript
+ * // Using Constructor
  * // 2x3 Matrix with 64-bit floating point (double) storage
  * new NDArray([[1,1,1],[4,4,4]],{datatype:'f64'});
+ * arr([[1,1,1],[4,4,4]])
  * ```
  * 
- * * Using standard functions
+ * * Using standard functions [[zeros]],[[eye]],[[empty]]
  * ```javascript
  * zeros([2,2,2]); // Returns 2x2x2 NDArray of zeros
  * eye([4,4]); // Creates 4x4 Identity matrix
@@ -150,13 +156,53 @@ function getDataArrayType(typestr?:string) {
  * Bluemath provides functions that allow basic math operations
  * on NDArrays
  * 
- * [[add]]
+ * [[add]], [[sub]], [[mul]], [[div]]
  * 
- * [[sub]]
+ * ```javascript
+ * let A = new NDArray([
+ *     [2,3],
+ *     [1,9]
+ * ],{datatype:'i32'});
+ * let B = eye(2,'i32');
  * 
- * [[mul]]
+ * let P = add(A,B); // A+B [[3,3],[1,10]]
+ * let Q = sub(A,B); // A-B [[1,3],[1,8]]
+ * let R = mul(3,A); // 3*A [[6,9],[3,27]]
+ * let S = div(A,2); // A/2 [[1,1],[0,4]]
+ * ```
  * 
- * [[div]]
+ * Slicing
+ * ---
+ * The [[NDArray.get]] method returns a specific element or a new NDArray
+ * that's a subset of this array as defined by the slicing recipe.
+ * Each element of the slicing recipe (i.e. any argument) can be
+ * 
+ * * A number specifying a specific element or slice of the array
+ * in given dimension. 
+ * * A string of the form `<start>:<stop>`, specifying the range of
+ * slices in the given dimension. Both `<start>` and `<stop>` are
+ * optional
+ * 
+ * ```javascript
+ * let A = new NDArray([
+ *     [1,2,3,4],
+ *     [5,6,7,8],
+ *     [9,10,11,12],
+ *     [13,14,15,16]
+ * ],{datatype:'i32'});
+ * 
+ * let P = A.get(':',1); // [2,6,10,14]
+ * let Q = A.get(1,':'); // [5,6,7,8]
+ * let R = A.get(null,2); // [3,7,11,15]
+ * let S = A.get(':2','1:3'); // [[2,3],[6,7]]
+ * 
+ * ```
+ * 
+ * Caveats
+ * ---
+ * * Negative indices not supported yet
+ * * No support for `<start>:<stop>:<step>` format yet
+ * 
  */
 export class NDArray {
 
@@ -315,7 +361,7 @@ export class NDArray {
     }
   }
 
-  _indexToAddress(...indices:number[]) {
+  indexToAddress(...indices:number[]) {
     if(indices.length !== this._shape.length) {
       throw new Error('Mismatched number of dimensions');
     }
@@ -355,7 +401,7 @@ export class NDArray {
   /**
    * @hidden
    */
-  _addressToIndex(addr:number) {
+  addressToIndex(addr:number) {
     if(addr >= this._size) {
       throw new Error("Data index out of range");
     }
@@ -487,7 +533,7 @@ export class NDArray {
       }
     } else {
       // Assignment of single item
-      let addr = this._indexToAddress(...index);
+      let addr = this.indexToAddress(...index);
       if(val instanceof Complex) {
         this._data[addr] = val.real;
         this._idata[addr] = val.imag;
@@ -546,7 +592,7 @@ export class NDArray {
    */
   forEach(callback:(value:number|Complex,...index:number[])=>void) {
     for(let i=0; i<this._size; i++) {
-      let index = this._addressToIndex(i);
+      let index = this.addressToIndex(i);
       if(this._idata[i] === undefined) {
         callback(this._data[i], ...index)
       } else {
@@ -684,21 +730,21 @@ export class NDArray {
   }
 
   /**
-   * Shorthand for get(...) method to avoid casting to <number>
+   * Shorthand for get(...) method to avoid casting to number
    */
   getN(...slices:(string|number|undefined|null)[]):number {
     return <number>this.get(...slices);
   }
 
   /**
-   * Shorthand for get(...) method to avoid casting to <NDArray>
+   * Shorthand for get(...) method to avoid casting to [[NDArray]]
    */
   getA(...slices:(string|number|undefined|null)[]):NDArray {
     return <NDArray>this.get(...slices);
   }
 
   /**
-   * Shorthand for get(...) method to avoid casting to <Complex>
+   * Shorthand for get(...) method to avoid casting to [[Complex]]
    */
   getC(...slices:(string|number|undefined|null)[]):Complex {
     return <Complex>this.get(...slices);
@@ -710,8 +756,8 @@ export class NDArray {
    * Each element of the slicing recipe (i.e. any argument) can be
    * * A number specifying a specific element or slice of the array
    * in given dimension. 
-   * * A string of the form '<start>:<stop>', specifying the range of
-   * slices in the given dimension. Both '<start>' and '<stop>' are
+   * * A string of the form `<start>:<stop>`, specifying the range of
+   * slices in the given dimension. Both `<start>` and `<stop>` are
    * optional
    * 
    * Caveats
@@ -734,7 +780,7 @@ export class NDArray {
     // result is a single element of the array
     if(nranges === 0) {
       let idx = <number[]>slice_recipe;
-      let addr = this._indexToAddress(...idx);
+      let addr = this.indexToAddress(...idx);
       if(this._idata[addr] === undefined) {
         return this._data[addr];
       } else {
@@ -750,7 +796,7 @@ export class NDArray {
     for(let i=0; i<slicesize; i++) {
 
       // Convert each address of slice array to index
-      let newidx = slicearr._addressToIndex(i);
+      let newidx = slicearr.addressToIndex(i);
 
       // Find index into the original array (oldidx) that corresponds
       // to the newidx
@@ -801,7 +847,7 @@ export class NDArray {
         let maxsize = maxshape.reduce((a,b)=>a*b,1);
         let maxarr = new NDArray({datatype:this._datatype, shape:maxshape});
         for(let i=0; i<maxsize; i++) {
-          let maxindex = maxarr._addressToIndex(i);
+          let maxindex = maxarr.addressToIndex(i);
           let sliceindex = maxindex.slice();
           sliceindex.splice(axis,0,':');
           let slice = <NDArray>this.get(...sliceindex);
