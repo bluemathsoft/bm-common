@@ -12,10 +12,14 @@ export interface NDArrayOptions {
  *
  * It can store real as well as complex numbers in n-dimensions
  * It can be used to store Vectors (1D) or Matrices (2D).
- * This class stores the data internally in flat typed arrays
+ * This class stores the data internally in typed arrays
+ *
+ * NDArray offers slicing to extract subarrays. The interface is inspired
+ * from numpy's API. It makes dealing with n-dimensional data extremely
+ * flexible.
  *
  * NDArray is the central class of Bluemath library.
- * It's used to input and output data to/from most of the APIs of this library.
+ * It's used by most of the APIs of the bluemath library.
  *
  * Construction
  * ---
@@ -28,13 +32,15 @@ export interface NDArrayOptions {
  * new NDArray({shape:[3,4,3],datatype:'i32'});
  * ```
  *
- * * Initializing it with array data
+ * * Initializing it with array data [[arr]]
  * ```javascript
+ * // Using Constructor
  * // 2x3 Matrix with 64-bit floating point (double) storage
  * new NDArray([[1,1,1],[4,4,4]],{datatype:'f64'});
+ * arr([[1,1,1],[4,4,4]])
  * ```
  *
- * * Using standard functions
+ * * Using standard functions [[zeros]],[[eye]],[[empty]]
  * ```javascript
  * zeros([2,2,2]); // Returns 2x2x2 NDArray of zeros
  * eye([4,4]); // Creates 4x4 Identity matrix
@@ -46,13 +52,53 @@ export interface NDArrayOptions {
  * Bluemath provides functions that allow basic math operations
  * on NDArrays
  *
- * [[add]]
+ * [[add]], [[sub]], [[mul]], [[div]]
  *
- * [[sub]]
+ * ```javascript
+ * let A = new NDArray([
+ *     [2,3],
+ *     [1,9]
+ * ],{datatype:'i32'});
+ * let B = eye(2,'i32');
  *
- * [[mul]]
+ * let P = add(A,B); // A+B [[3,3],[1,10]]
+ * let Q = sub(A,B); // A-B [[1,3],[1,8]]
+ * let R = mul(3,A); // 3*A [[6,9],[3,27]]
+ * let S = div(A,2); // A/2 [[1,1],[0,4]]
+ * ```
  *
- * [[div]]
+ * Slicing
+ * ---
+ * The [[NDArray.get]] method returns a specific element or a new NDArray
+ * that's a subset of this array as defined by the slicing recipe.
+ * Each element of the slicing recipe (i.e. any argument) can be
+ *
+ * * A number specifying a specific element or slice of the array
+ * in given dimension.
+ * * A string of the form `<start>:<stop>`, specifying the range of
+ * slices in the given dimension. Both `<start>` and `<stop>` are
+ * optional
+ *
+ * ```javascript
+ * let A = new NDArray([
+ *     [1,2,3,4],
+ *     [5,6,7,8],
+ *     [9,10,11,12],
+ *     [13,14,15,16]
+ * ],{datatype:'i32'});
+ *
+ * let P = A.get(':',1); // [2,6,10,14]
+ * let Q = A.get(1,':'); // [5,6,7,8]
+ * let R = A.get(null,2); // [3,7,11,15]
+ * let S = A.get(':2','1:3'); // [[2,3],[6,7]]
+ *
+ * ```
+ *
+ * Caveats
+ * ---
+ * * Negative indices not supported yet
+ * * No support for `<start>:<stop>:<step>` format yet
+ *
  */
 export declare class NDArray {
     /**
@@ -107,7 +153,7 @@ export declare class NDArray {
     clone(): NDArray;
     private _calcSize();
     private _alloc(size, data?, datatype?);
-    _indexToAddress(...indices: number[]): number;
+    indexToAddress(...indices: number[]): number;
     /**
      * @hidden
      */
@@ -115,7 +161,7 @@ export declare class NDArray {
     /**
      * @hidden
      */
-    _addressToIndex(addr: number): any[];
+    addressToIndex(addr: number): any[];
     /**
      * Create nested array
      */
@@ -169,15 +215,15 @@ export declare class NDArray {
     private createSliceRecipe(slices);
     private computeSliceShapeAndSize(slice_recipe);
     /**
-     * Shorthand for get(...) method to avoid casting to <number>
+     * Shorthand for get(...) method to avoid casting to number
      */
     getN(...slices: (string | number | undefined | null)[]): number;
     /**
-     * Shorthand for get(...) method to avoid casting to <NDArray>
+     * Shorthand for get(...) method to avoid casting to [[NDArray]]
      */
     getA(...slices: (string | number | undefined | null)[]): NDArray;
     /**
-     * Shorthand for get(...) method to avoid casting to <Complex>
+     * Shorthand for get(...) method to avoid casting to [[Complex]]
      */
     getC(...slices: (string | number | undefined | null)[]): Complex;
     /**
@@ -186,8 +232,8 @@ export declare class NDArray {
      * Each element of the slicing recipe (i.e. any argument) can be
      * * A number specifying a specific element or slice of the array
      * in given dimension.
-     * * A string of the form '<start>:<stop>', specifying the range of
-     * slices in the given dimension. Both '<start>' and '<stop>' are
+     * * A string of the form `<start>:<stop>`, specifying the range of
+     * slices in the given dimension. Both `<start>` and `<stop>` are
      * optional
      *
      * Caveats
